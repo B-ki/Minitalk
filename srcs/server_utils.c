@@ -6,7 +6,7 @@
 /*   By: rmorel <rmorel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/23 14:47:55 by rmorel            #+#    #+#             */
-/*   Updated: 2022/03/11 19:06:03 by rmorel           ###   ########.fr       */
+/*   Updated: 2022/03/21 17:35:58 by rmorel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,12 +69,19 @@ void	refresh_global(void)
 	free(g_st.message);
 	g_st.message = NULL;
 	if (g_st.size_mess)
-	    free(g_st.size_mess);
+		free(g_st.size_mess);
 	g_st.size_mess = malloc(sizeof(char) * (32 + 1));
 	if (!g_st.size_mess)
-	    exit(1);
+		exit(1);
 	while (++i < 32)
 		g_st.size_mess[i] = 0;
 	g_st.size_mess[32] = '\0';
 	return ;
+}
+
+void	malloc_message(void)
+{
+	g_st.message = malloc(sizeof(char) * (bin_to_int(g_st.size_mess) * 8 + 1));
+	if (!g_st.message)
+		exit(1);
 }

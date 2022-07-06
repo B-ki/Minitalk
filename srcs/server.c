@@ -6,19 +6,18 @@
 /*   By: rmorel <rmorel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/18 10:39:02 by rmorel            #+#    #+#             */
-/*   Updated: 2022/03/11 19:04:14 by rmorel           ###   ########.fr       */
+/*   Updated: 2022/03/21 17:22:55 by rmorel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.h"
 
-t_stock	g_st = {0, 0, NULL, NULL};
+t_stock		g_st = {0, 0, NULL, NULL};
 
 int	main(void)
 {
 	pid_t				pid;
 	struct sigaction	sa;
-	char			*str;
 
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = handler;
@@ -34,12 +33,7 @@ int	main(void)
 	{
 		pause();
 		if (check_end())
-		{
-			str = bin_to_str(g_st.message);
-			ft_printf("%s\n", str);
-			free(str);
-			refresh_global();
-		}
+			print_string();
 	}
 	return (0);
 }
@@ -51,17 +45,11 @@ void	handler(int signo, siginfo_t *info, void *context)
 	if (g_st.i <= 31)
 	{
 		if (signo == SIGUSR1)
-		{
 			g_st.size_mess[g_st.i] = '0';
-			ft_printf("size_mess[%d] : 0\n", g_st.i);
-		}
 		else
-		{
 			g_st.size_mess[g_st.i] = '1';
-			ft_printf("size_mess[%d] : 1\n", g_st.i);
-		}
 		if (kill(g_st.pidclient, SIGUSR2) == -1)
-		    ft_printf("Cannot reach back client !");
+			ft_printf("Cannot reach back client !");
 	}
 	else if (g_st.i >= 32)
 	{
@@ -70,17 +58,10 @@ void	handler(int signo, siginfo_t *info, void *context)
 		else if (signo == SIGUSR2)
 			g_st.message[g_st.i - 32] = '1';
 		if (kill(g_st.pidclient, SIGUSR2) == -1)
-		    ft_printf("Cannot reach back client !");
+			ft_printf("Cannot reach back client !");
 	}
 	if (g_st.i == 31)
-	{
-		ft_printf("i = %d -- size = %s -- mess = %s\n", g_st.i, g_st.size_mess, g_st.message);
-		g_st.message = malloc(sizeof(char) * (bin_to_int(g_st.size_mess) * 8 + 1));
-		if (!g_st.message)
-		    exit(1);
-		ft_printf("size = %d\n", bin_to_int(g_st.size_mess) * 8 + 1);
-	}
-	//ft_printf("i = %d\n", g_st.i);
+		malloc_message();
 	g_st.i += 1;
 }
 
@@ -126,4 +107,16 @@ int	check_end(void)
 		}
 	}
 	return (0);
+}
+
+void	print_string(void)
+{
+	char	*str;
+
+	str = NULL;
+	str = bin_to_str(g_st.message);
+	ft_printf("%s\n", str);
+	free(str);
+	refresh_global();
+	return ;
 }

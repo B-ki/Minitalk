@@ -6,12 +6,14 @@
 /*   By: rmorel <rmorel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/18 14:16:56 by rmorel            #+#    #+#             */
-/*   Updated: 2022/03/11 13:47:00 by rmorel           ###   ########.fr       */
+/*   Updated: 2022/03/28 09:44:48 by rmorel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "client.h"
 #include <stdio.h>
+
+t_mess	g_m = {NULL, NULL};
 
 void	error(void)
 {
@@ -21,27 +23,25 @@ void	error(void)
 
 int	main(int ac, char **av)
 {
-	char			*bin;
-	pid_t			pid;
-	char			*size;
+	pid_t				pid;
 	struct sigaction	sa;
 
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_handler = &handler;
+	if (ac != 3 || av[1][0] == '\0' || av[2][0] == '\0')
+		error();
 	pid = (pid_t)ft_atoi(av[1]);
-	if (ac != 3 || pid <= 0 || pid > 2147483647 
-		|| av[2][0] == '\0' || av[2][0] == '\0')
+	if (pid <= 0 || pid > 2147483647)
 		error();
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
-	bin = binary_converter(av[2]);
-	size = int_to_bin(ft_strlen(av[2]));
-	send_message(size, pid, 0);
-	send_message(bin, pid, 1);
-	ft_printf("%s\n", size);
-	free(bin);
-	free(size);
+	g_m.size = int_to_bin(ft_strlen(av[2]));
+	g_m.mess = binary_converter(av[2]);
+	send_message(g_m.size, pid, 0);
+	send_message(g_m.mess, pid, 1);
+	free(g_m.size);
+	free(g_m.mess);
 	return (0);
 }
 
@@ -97,7 +97,7 @@ char	*binary_converter(char *str)
 
 void	handler(int signum)
 {
-	static	int	bits_received = 0;
+	static int	bits_received = 0;
 
 	if (signum == SIGUSR1)
 		ft_printf("All data have been printed !\n");
